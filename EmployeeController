@@ -1,0 +1,47 @@
+package com.lovetolearn.SpringbootApp.controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class EmployeeController {
+
+	boolean check = false;
+
+	@GetMapping("fetch")
+	public synchronized String fetchData() {
+
+		System.out.println("Inside fetchData");
+		while (check) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+
+		System.out.println("Outside fetchData");
+		return "check";
+	}
+
+	@GetMapping("load")
+	public synchronized String loadIt() throws InterruptedException {
+		check = true;
+		Thread.sleep(1000);
+
+		System.out.println("inside loadIt");
+
+		try {
+			System.out.println("exited loadIt");
+		} catch (Exception e) {
+			// TODO: handle exception
+		} finally {
+			check = false;
+			notifyAll();
+		}
+		return "load";
+	}
+
+}
