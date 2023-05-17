@@ -6,13 +6,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class EmployeeController {
 
-	boolean check = false;
+	boolean insideFetch = false;
+	boolean insideLoad = false;
 
 	@GetMapping("fetch")
-	public synchronized String fetchData() {
-
+	public synchronized String fetchData() throws InterruptedException {
+		insideFetch = true;
 		System.out.println("Inside fetchData");
-		while (check) {
+		Thread.sleep(1000);
+		while (insideLoad) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
@@ -22,23 +24,37 @@ public class EmployeeController {
 
 		}
 
+		try {
+			System.out.println("logic");
+		} catch (Exception e) {
+			// TODO: handle exception
+		} finally {
+			insideFetch = false;
+			notifyAll();
+		}
+
 		System.out.println("Outside fetchData");
 		return "check";
 	}
 
 	@GetMapping("load")
 	public synchronized String loadIt() throws InterruptedException {
-		check = true;
+		insideLoad = true;
 		Thread.sleep(1000);
 
 		System.out.println("inside loadIt");
 
 		try {
-			System.out.println("exited loadIt");
+			wait();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		try {
+			System.out.println("logic");
 		} catch (Exception e) {
 			// TODO: handle exception
 		} finally {
-			check = false;
+			insideLoad = false;
 			notifyAll();
 		}
 		return "load";
